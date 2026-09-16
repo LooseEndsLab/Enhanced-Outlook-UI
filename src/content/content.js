@@ -50,9 +50,30 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // to icon-only Archive controls. A CSS pseudo-element can be clipped by
 // Outlook's toolbar internals, while a real node participates in the control's
 // normal layout.
-new MutationObserver(() => {
-  queueArchiveLabelUpdate();
-  queueEmailSizeControlsUpdate();
+new MutationObserver((mutations) => {
+  let archiveMayHaveChanged = false;
+  let emailContentMayHaveChanged = false;
+
+  for (const mutation of mutations) {
+    if (mutation.type === 'childList') {
+      archiveMayHaveChanged = true;
+      emailContentMayHaveChanged = true;
+      continue;
+    }
+
+    const target = mutation.target;
+    if (isArchiveControlOrChild(target)) archiveMayHaveChanged = true;
+    if (
+      mutation.attributeName === 'role' &&
+      target instanceof Element &&
+      target.matches('[role="document"]')
+    ) {
+      emailContentMayHaveChanged = true;
+    }
+  }
+
+  if (archiveMayHaveChanged) queueArchiveLabelUpdate();
+  if (emailContentMayHaveChanged) queueEmailSizeControlsUpdate();
 }).observe(document.documentElement, {
   attributes: true,
   attributeFilter: [
@@ -67,6 +88,13 @@ new MutationObserver(() => {
   childList: true,
   subtree: true
 });
+
+function isArchiveControlOrChild(target) {
+  return target instanceof Element && Boolean(
+    target.matches(ARCHIVE_CONTROL_SELECTOR) ||
+    target.closest(ARCHIVE_CONTROL_SELECTOR)
+  );
+}
 
 document.addEventListener('wheel', (event) => {
   if (!settings.enabled) return;
