@@ -50,7 +50,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // to icon-only Archive controls. A CSS pseudo-element can be clipped by
 // Outlook's toolbar internals, while a real node participates in the control's
 // normal layout.
-new MutationObserver((mutations) => {
+const outlookDomObserver = new MutationObserver((mutations) => {
   let archiveMayHaveChanged = false;
   let emailContentMayHaveChanged = false;
 
@@ -74,20 +74,32 @@ new MutationObserver((mutations) => {
 
   if (archiveMayHaveChanged) queueArchiveLabelUpdate();
   if (emailContentMayHaveChanged) queueEmailSizeControlsUpdate();
-}).observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: [
-    'aria-label',
-    'data-automation-type',
-    'dataautomationtype',
-    'data-icon-name',
-    'label',
-    'role',
-    'title'
-  ],
-  childList: true,
-  subtree: true
 });
+
+function startOutlookDomObserver() {
+  // At document_start Chrome can inject into an Outlook frame before its root
+  // element exists. Do not let that timing prevent the wheel listener below
+  // from being registered.
+  if (!document.documentElement) {
+    document.addEventListener('DOMContentLoaded', startOutlookDomObserver, { once: true });
+    return;
+  }
+
+  outlookDomObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: [
+      'aria-label',
+      'data-automation-type',
+      'dataautomationtype',
+      'data-icon-name',
+      'label',
+      'role',
+      'title'
+    ],
+    childList: true,
+    subtree: true
+  });
+}
 
 function isArchiveControlOrChild(target) {
   return target instanceof Element && Boolean(
@@ -125,7 +137,14 @@ document.addEventListener('keydown', (event) => {
   changeEmailScale(direction);
 }, { capture: true });
 
+startOutlookDomObserver();
+
 function applyVisualSettings() {
+  if (!document.documentElement) {
+    document.addEventListener('DOMContentLoaded', applyVisualSettings, { once: true });
+    return;
+  }
+
   document.documentElement.dataset.enhancedOutlookArchiveButton = String(
     settings.enabled && settings.archiveButton
   );
