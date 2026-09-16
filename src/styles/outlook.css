@@ -5,8 +5,8 @@
  * not render one itself, preventing an "Archive Archive" button.
  */
 html[data-enhanced-outlook-archive-button="true"] button[aria-label^="Archive"],
-html[data-enhanced-outlook-archive-button="true"] button[data-automation-type="RibbonButton"][label="Archive"],
-html[data-enhanced-outlook-archive-button="true"] button[dataautomationtype="RibbonButton"][label="Archive"],
+html[data-enhanced-outlook-archive-button="true"] [data-automation-type="RibbonButton"][label="Archive"],
+html[data-enhanced-outlook-archive-button="true"] [dataautomationtype="RibbonButton"][label="Archive"],
 html[data-enhanced-outlook-archive-button="true"] [role="button"][aria-label^="Archive"],
 html[data-enhanced-outlook-archive-button="true"] button[title^="Archive"],
 html[data-enhanced-outlook-archive-button="true"] [role="button"][title^="Archive"],

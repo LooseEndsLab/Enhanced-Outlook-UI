@@ -20,8 +20,8 @@ const EMAIL_SCALE_MAX = 1.6;
 const EMAIL_SCALE_STEP = 0.1;
 
 const ARCHIVE_CONTROL_SELECTOR = [
-  'button[data-automation-type="RibbonButton"][label="Archive"]',
-  'button[dataautomationtype="RibbonButton"][label="Archive"]',
+  '[data-automation-type="RibbonButton"][label="Archive"]',
+  '[dataautomationtype="RibbonButton"][label="Archive"]',
   'button[aria-label^="Archive"]',
   '[role="button"][aria-label^="Archive"]',
   'button[title^="Archive"]',
@@ -45,14 +45,25 @@ chrome.storage.onChanged.addListener((changes, area) => {
   applyVisualSettings();
 });
 
-// Outlook replaces toolbar controls as its single-page UI changes. Add a real
-// text node only to icon-only Archive controls. A CSS pseudo-element can be
-// clipped by Outlook's toolbar internals, while a real node participates in
-// the control's normal layout.
+// Outlook replaces toolbar controls as its single-page UI changes, and can set
+// their identifying attributes after inserting them. Add a real text node only
+// to icon-only Archive controls. A CSS pseudo-element can be clipped by
+// Outlook's toolbar internals, while a real node participates in the control's
+// normal layout.
 new MutationObserver(() => {
   queueArchiveLabelUpdate();
   queueEmailSizeControlsUpdate();
 }).observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: [
+    'aria-label',
+    'data-automation-type',
+    'dataautomationtype',
+    'data-icon-name',
+    'label',
+    'role',
+    'title'
+  ],
   childList: true,
   subtree: true
 });

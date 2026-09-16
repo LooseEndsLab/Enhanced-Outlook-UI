@@ -6,7 +6,7 @@ Made since Stanford uses Microsoft/Outlook for all student emails.
 
 1. Restores Chrome’s normal page pinch zoom in Outlook.
 2. Keeps normal sideways scrolling available when the page is zoomed in.
-3. Makes the Archive button wider and ensures icon-only versions have one clear label.
+3. Makes the Archive button wider and ensures icon-only versions have one clear label, including when Outlook finishes building the Ribbon after a reload.
 4. Adds `−`/`+` controls and `-`/`=` keyboard shortcuts for scaling an opened email's content from 80% to 160%.
 5. Adds saved popup toggles for every feature and the extension as a whole.
 
